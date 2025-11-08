@@ -1,4 +1,4 @@
-// --- THIS IS YOUR HELPER FUNCTION ---
+// --- 1. HELPER FUNCTION ---
 function normalizeText(text) {
   let normalized = text.toLowerCase();
   const swaps = { '0': 'o', '@': 'a', '4': 'a', '3': 'e', '1': 'i', '!': 'i', '$': 's', '5': 's' };
@@ -10,64 +10,159 @@ function normalizeText(text) {
   return normalized;
 }
 
-// --- 1. NEW: DEFINE GLOBALS ---
-// We define these variables in the global scope so Mermaid can access them.
-// They will be given their values inside DOMContentLoaded.
+// --- 2. GLOBAL VARIABLES ---
+// We define these globally so the map's click handler can find them
 let mapModal = null;
 let renderPage = null;
 
-// --- 2. NEW: GLOBAL CLICK HANDLER ---
-// This function *must* be global for Mermaid.js to find it.
-function goToPageFromMap(pageId) {
-  // Check if renderPage has been assigned a function yet
+window.goToPageFromMap = function(pageId) {
+//
+// --- END OF THE CHANGE ---
+//
+
   if (pageId && renderPage) {
-    renderPage(pageId); // Call the function
+    renderPage(pageId); // Call the main render function
+  } else {
+    // This will show an error if something is wrong
+    console.error("Error: renderPage function is not ready.");
   }
-  // Check if mapModal has been assigned an element yet
+
   if (mapModal) {
     mapModal.style.display = 'none'; // Close the modal
   }
 }
 
-
+// --- 3. MAIN SCRIPT START ---
 document.addEventListener("DOMContentLoaded", function () {
 
-  // --- 3. Connect to our database ---
+  // --- 4. Initialize Firebase Services ---
   const database = firebase.database();
+  const auth = firebase.auth();
 
-  // --- 4. Find our HTML elements ---
+  // --- 5. Find HTML Elements ---
   const storyElement = document.getElementById('story-text');
   const choicesContainer = document.getElementById('choices-container');
-  const newChoiceInput = document.getElementById('new-choice-text');
-  const newStoryInput = document.getElementById('new-story-text');
-  const addChoiceButton = document.getElementById('add-choice-button');
   const goBackButton = document.getElementById('go-back-button');
   const goStartButton = document.getElementById('go-start-button');
   const themeToggleButton = document.getElementById('theme-toggle-button');
   const sortPopularButton = document.getElementById('sort-popular-button');
   const sortNewestButton = document.getElementById('sort-newest-button');
 
-  // NEW: Image Support Elements
-  const storyImageContainer = document.getElementById('story-image-container');
-  const newImageUrlInput = document.getElementById('new-image-url');
+  // Build Form Elements
+  const newChoiceInput = document.getElementById('new-choice-text');
+  const newStoryInput = document.getElementById('new-story-text');
+  const addChoiceButton = document.getElementById('add-choice-button');
+  const newImageUrlInput = document.getElementById('new-image-url'); // Image
+  const storyImageContainer = document.getElementById('story-image-container'); // Image
 
-  // NEW: Story Map Modal Elements
-  // --- 5. NEW: ASSIGN GLOBAL VARIABLE ---
-  // We assign the element to the global 'mapModal' variable we defined earlier.
-  mapModal = document.getElementById('map-modal');
+  // Auth Elements
+  const authCard = document.getElementById('auth-card');
+  const signupForm = document.getElementById('signup-form');
+  const loginForm = document.getElementById('login-form');
+  const loginUsernameInput = document.getElementById('login-username');
+  const authError = document.getElementById('auth-error');
+  const userInfoCard = document.getElementById('user-info-card');
+  const userEmailDisplay = document.getElementById('user-email-display');
+  const logoutButton = document.getElementById('logout-button');
+  const buildCard = document.getElementById('build-card');
+  
+  // Map Elements
+  mapModal = document.getElementById('map-modal'); // Assign to global var
   const openMapButton = document.getElementById('open-map-button');
   const closeMapButton = document.getElementById('close-map-button');
   const mermaidGraphDiv = document.getElementById('mermaid-graph');
 
+  // --- 6. Global State Variables ---
   let pageHistory = [];
   let currentPageId = null;
-  let currentSortMode = 'popular'; // 'popular' or 'newest'
+  let currentSortMode = 'popular';
+  
+  // -------------------------------------------------------------------
+  // --- 7. AUTHENTICATION LOGIC ---
+  // -------------------------------------------------------------------
+
+  auth.onAuthStateChanged(function(user) {
+    if (user) {
+      // User is LOGGED IN
+      authCard.style.display = 'none';
+      userInfoCard.style.display = 'block';
+      buildCard.style.display = 'block';
+      userEmailDisplay.innerText = user.displayName || user.email;
+      authError.innerText = '';
+    } else {
+      // User is LOGGED OUT
+      authCard.style.display = 'block';
+      userInfoCard.style.display = 'none';
+      buildCard.style.display = 'none';
+      userEmailDisplay.innerText = '';
+    }
+  });
+
+  // --- Sign Up Button ---
+  document.getElementById('signup-button').addEventListener('click', function() {
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const username = document.getElementById('signup-username').value;
+    
+    if (username === "" || email === "" || password === "") {
+      authError.innerText = "Please fill out all fields.";
+      return;
+    }
+
+    const normalizedUsername = username.toLowerCase();
+    const usernamesRef = database.ref('usernames/' + normalizedUsername);
+
+    usernamesRef.once('value', (snapshot) => {
+      if (snapshot.exists()) {
+        authError.innerText = "This username already exists.";
+      } else {
+        auth.createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            userCredential.user.updateProfile({ displayName: username });
+            database.ref('usernames/' + normalizedUsername).set(userCredential.user.uid);
+            database.ref('username_to_email/' + normalizedUsername).set(email);
+          })
+          .catch((error) => { authError.innerText = error.message; });
+      }
+    });
+  });
+
+  // --- Log In Button ---
+  document.getElementById('login-button').addEventListener('click', function() {
+    const username = loginUsernameInput.value;
+    const password = document.getElementById('login-password').value;
+
+    if (username === "" || password === "") {
+      authError.innerText = "Please enter a username and password.";
+      return;
+    }
+
+    const normalizedUsername = username.toLowerCase();
+    const emailLookupRef = database.ref('username_to_email/' + normalizedUsername);
+
+    emailLookupRef.once('value', (snapshot) => {
+      if (!snapshot.exists()) {
+        authError.innerText = "Invalid username or password.";
+      } else {
+        const email = snapshot.val();
+        auth.signInWithEmailAndPassword(email, password)
+          .then((userCredential) => { authError.innerText = ""; })
+          .catch((error) => { authError.innerText = "Invalid username or password."; });
+      }
+    });
+  });
+
+  // --- Log Out Button ---
+  logoutButton.addEventListener('click', function() {
+    auth.signOut();
+  });
 
 
-  // --- 6. Our "machine" to render a page (UPGRADED FOR LIKES & IMAGES) ---
-  // --- 7. NEW: ASSIGN GLOBAL VARIABLE ---
-  // Instead of 'function renderPage()', we assign the function to the
-  // global 'renderPage' variable we defined earlier.
+  // -------------------------------------------------------------------
+  // --- 8. RENDERPAGE FUNCTION (MERGED) ---
+  // -------------------------------------------------------------------
+  
+  // Assign to the global variable so the map can call it
   renderPage = function (pageId) {
     currentPageId = pageId;
     if (pageId === 'page_1') {
@@ -77,15 +172,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     goBackButton.style.display = (pageHistory.length > 1) ? 'inline-block' : 'none';
-
-    database.ref().off();
+    
+    database.ref().off(); 
     const pageRef = database.ref('pages/' + pageId);
-
-    pageRef.on('value', function (snapshot) {
-
+    
+    pageRef.on('value', function(snapshot) {
+      
       const pageData = snapshot.val();
-
-      // NEW: Clear any old image from the container
+      
+      // MERGED: Clear old image
       storyImageContainer.innerHTML = '';
 
       if (!pageData) {
@@ -97,198 +192,194 @@ document.addEventListener("DOMContentLoaded", function () {
       storyElement.innerText = pageData.story_text;
       choicesContainer.innerHTML = "";
 
-      // NEW: Check for an image URL and display it
+      // MERGED: Display new image if it exists
       if (pageData.image_url) {
         const img = document.createElement('img');
         img.src = pageData.image_url;
-        img.id = 'story-image'; // Add id for styling
+        img.id = 'story-image';
         storyImageContainer.appendChild(img);
       }
-      // --- End of new image logic ---
-
+      
       const choices = pageData.choices;
-
       document.getElementById('add-choice-form').style.display = 'block';
 
       if (choices) {
-        // --- Get the list of liked choices from browser memory ---
         let likedChoices = localStorage.getItem('likedChoices');
         likedChoices = likedChoices ? JSON.parse(likedChoices) : [];
-        // --- End of new part ---
 
         let choicesArray = [];
         for (const choiceId in choices) {
-          choicesArray.push({
-            id: choiceId,
-            ...choices[choiceId]
-          });
+          choicesArray.push({ id: choiceId, ...choices[choiceId] });
         }
-
+        
         if (currentSortMode === 'popular') {
           choicesArray.sort((a, b) => (b.likes || 0) - (a.likes || 0));
         } else {
           choicesArray.reverse();
         }
-
+        
         choicesArray.forEach(choice => {
           const choiceContainer = document.createElement('div');
           choiceContainer.className = 'choice-container';
-
+          
           const newButton = document.createElement('button');
           newButton.innerText = choice.text;
           newButton.className = 'choice-button';
-          newButton.addEventListener('click', function () {
-            renderPage(choice.leads_to_page);
-          });
-
+          newButton.addEventListener('click', () => renderPage(choice.leads_to_page));
+          
           const likeButton = document.createElement('button');
           likeButton.innerText = '👍';
           likeButton.className = 'like-button';
-
-          // --- NEW LOGIC TO CHECK IF ALREADY LIKED ---
+          
           if (likedChoices.includes(choice.id)) {
-            likeButton.classList.add('liked'); // Add new CSS class
-            likeButton.disabled = true;       // Disable the button
+            likeButton.classList.add('liked');
+            likeButton.disabled = true;
           }
-          // --- END OF NEW LOGIC ---
-
-          likeButton.addEventListener('click', function () {
-            // Double-check just in case
+          
+          likeButton.addEventListener('click', function() {
             let currentLikedChoices = localStorage.getItem('likedChoices');
             currentLikedChoices = currentLikedChoices ? JSON.parse(currentLikedChoices) : [];
+            if (currentLikedChoices.includes(choice.id)) return;
 
-            if (currentLikedChoices.includes(choice.id)) {
-              return; // Already liked, do nothing
-            }
-
-            // 1. Update Firebase
             const currentLikes = choice.likes || 0;
-            const choiceRef = database.ref('pages/' + currentPageId + '/choices/' + choice.id);
+            const choiceRef = database.ref(`pages/${currentPageId}/choices/${choice.id}`);
             choiceRef.update({ likes: currentLikes + 1 });
-
-            // 2. "Stamp" the browser's memory
+            
             currentLikedChoices.push(choice.id);
             localStorage.setItem('likedChoices', JSON.stringify(currentLikedChoices));
-
-            // 3. Visually disable the button right away
+            
             likeButton.classList.add('liked');
             likeButton.disabled = true;
           });
-
+          
           const likeCount = document.createElement('span');
           likeCount.innerText = (choice.likes || 0) + ' likes';
           likeCount.className = 'like-count';
-
+          
+          // MERGED: Creator Info
+          const creatorInfo = document.createElement('span');
+          creatorInfo.className = 'creator-info';
+          creatorInfo.innerText = `by: ${choice.creatorName || 'Anonymous'}`; 
+          
           choiceContainer.appendChild(newButton);
           choiceContainer.appendChild(likeButton);
           choiceContainer.appendChild(likeCount);
+          choiceContainer.appendChild(creatorInfo); // Add creator info
           choicesContainer.appendChild(choiceContainer);
         });
       }
     });
-  }; // <-- Note the semicolon, because this is an assignment
+  }; // End of renderPage function
 
 
-  // --- 8. "ADD CHOICE" BUTTON LOGIC (UPGRADED) ---
-  addChoiceButton.addEventListener('click', function () {
-
-    const choiceText = newChoiceInput.value;
-    const storyText = newStoryInput.value;
-    // NEW: Get the image URL value
-    const imageUrl = newImageUrlInput.value.trim();
-
-    if (choiceText === "" || storyText === "") {
-      alert("Please fill out both the 'choice' and the 'story'!");
+  // -------------------------------------------------------------------
+  // --- 9. "ADD CHOICE" BUTTON LOGIC (MERGED) ---
+  // -------------------------------------------------------------------
+  
+  addChoiceButton.addEventListener('click', function() {
+    
+    // Auth check
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be logged in to build a new path!");
       return;
     }
 
+    const choiceText = newChoiceInput.value;
+    const storyText = newStoryInput.value;
+    // Image URL
+    const imageUrl = newImageUrlInput.value.trim(); 
+    
+    if (choiceText === "" || storyText === "") {
+      alert("Please fill out both the 'choice' and the 'story'!");
+      return; 
+    }
+    
+    // Filter
     const blocklist = ["poop", "silly", "badword"];
     const normalizedInput = normalizeText(choiceText + " " + storyText);
-    for (let i = 0; i < blocklist.length; i++) {
-      if (normalizedInput.includes(blocklist[i])) {
-        alert("Whoops! Please use appropriate language and try again.");
-        return;
-      }
+    if (blocklist.some(word => normalizedInput.includes(word))) {
+      alert("Whoops! Please use appropriate language.");
+      return;
     }
 
     const newPageRef = database.ref('pages').push();
     const newPageId = newPageRef.key;
-
-    // NEW: Create the new page data object
+    
+    // MERGED: Create new page data with optional image
     const newPageData = {
       story_text: storyText
     };
-
-    // NEW: Only add the image_url if one was provided
     if (imageUrl) {
       newPageData.image_url = imageUrl;
     }
-
-    // NEW: Set the new page data
     newPageRef.set(newPageData);
 
+    // MERGED: Add user info to the choice object
     const newChoice = {
       text: choiceText,
       leads_to_page: newPageId,
-      likes: 0
+      likes: 0,
+      createdBy: user.uid,
+      creatorName: user.displayName || user.email 
     };
-
-    database.ref('pages/' + currentPageId + '/choices').push(newChoice);
-
+    
+    database.ref(`pages/${currentPageId}/choices`).push(newChoice);
+    
     newChoiceInput.value = "";
     newStoryInput.value = "";
-    // NEW: Clear the image input
-    newImageUrlInput.value = "";
+    newImageUrlInput.value = ""; // Clear image input
   });
 
 
-  // --- 9. NAVIGATION BUTTONS ---
-  goStartButton.addEventListener('click', function () {
-    renderPage('page_1');
-  });
-
-  goBackButton.addEventListener('click', function () {
-    pageHistory.pop(); // Remove current page
-    const previousPageId = pageHistory.pop(); // Get page before that
+  // -------------------------------------------------------------------
+  // --- 10. NAVIGATION & SORT BUTTONS ---
+  // -------------------------------------------------------------------
+  
+  goStartButton.addEventListener('click', () => renderPage('page_1'));
+  
+  goBackButton.addEventListener('click', function() {
+    pageHistory.pop();
+    const previousPageId = pageHistory.pop();
     renderPage(previousPageId);
   });
-
-  themeToggleButton.addEventListener('click', function () {
-    document.body.classList.toggle('dark-mode');
-  });
-
-  // --- 10. NEW SORT BUTTON LOGIC ---
-  sortPopularButton.addEventListener('click', function () {
+  
+  themeToggleButton.addEventListener('click', () => document.body.classList.toggle('dark-mode'));
+  
+  sortPopularButton.addEventListener('click', function() {
     currentSortMode = 'popular';
     sortPopularButton.classList.add('sort-active');
     sortNewestButton.classList.remove('sort-active');
     renderPage(currentPageId);
   });
-
-  sortNewestButton.addEventListener('click', function () {
+  
+  sortNewestButton.addEventListener('click', function() {
     currentSortMode = 'newest';
     sortNewestButton.classList.add('sort-active');
     sortPopularButton.classList.remove('sort-active');
     renderPage(currentPageId);
   });
+  
 
-
-  // --- 11. THIS IS WHAT STARTS EVERYTHING ---
-  renderPage('page_1');
-
-
-  // --- 12. NEW: STORY MAP LOGIC ---
+  // -------------------------------------------------------------------
+  // --- 11. NEW: STORY MAP LOGIC ---
+  // -------------------------------------------------------------------
 
   // Initialize Mermaid.js
   mermaid.initialize({
     startOnLoad: true,
-    theme: 'dark', // Use dark theme to match your UI
+    theme: 'dark', 
+    
+    // --- THIS IS THE NEW, IMPORTANT LINE ---
+    securityLevel: 'loose', 
+    // --- END OF NEW LINE ---
+
     flowchart: {
       useMaxWidth: true,
       htmlLabels: true,
-      rankSpacing: 70, // More vertical space
-      nodeSpacing: 60, // More horizontal space
-      curve: 'linear'  // Use straight lines
+      rankSpacing: 70,
+      nodeSpacing: 60,
+      curve: 'linear'
     }
   });
 
@@ -300,13 +391,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // The main function to build and show the map
   async function generateAndShowMap() {
-
-    // Show the modal with a loading message
     mermaidGraphDiv.innerHTML = 'Loading map...';
     mapModal.style.display = 'flex';
 
     try {
-      // Fetch ALL pages from Firebase
       const snapshot = await firebase.database().ref('pages').once('value');
       const allPages = snapshot.val();
 
@@ -315,43 +403,42 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      let mermaidString = 'graph TD;\n'; // TD = Top Down graph
+      let mermaidString = 'graph TD;\n'; // Top Down graph
 
-      // Loop through every page
       for (const pageId in allPages) {
         const page = allPages[pageId];
 
-        // Get a short, clean version of the story text for the node label
+        // Get clean text for the node label
         const shortText = page.story_text.substring(0, 20).replace(/"/g, '#quot;') + '...';
         mermaidString += `  ${pageId}["${shortText}"];\n`;
+        
+        // This is the new, fixed line
+        mermaidString += `  click ${pageId} "javascript:goToPageFromMap('${pageId}')";\n`;
 
-        // This click handler tells Mermaid to call the GLOBAL 'goToPageFromMap' function
-        // This syntax is correct and will now work.
-        mermaidString += `  click ${pageId} call goToPageFromMap("${pageId}");\n`;
-
-        // Now, loop through the choices for this page
         if (page.choices) {
           for (const choiceId in page.choices) {
             const choice = page.choices[choiceId];
-
-            // Get clean text for the link label
             const choiceText = choice.text.replace(/"/g, '#quot;');
-            mermaidString += `  ${pageId} -- "${choiceText}" --> ${choice.leads_to_page};\n`;
+            // Ensure the leads_to_page exists before drawing an arrow
+            if (allPages[choice.leads_to_page]) {
+              mermaidString += `  ${pageId} -- "${choiceText}" --> ${choice.leads_to_page};\n`;
+            }
           }
         }
       }
 
-      // Now, render the graph
+      // Render the graph
       mermaid.render('mermaid-svg', mermaidString, (svgCode) => {
         mermaidGraphDiv.innerHTML = svgCode;
       });
 
     } catch (error) {
       console.error("Error generating map:", error);
-      // --- THIS IS THE CORRECTED TYPO ---
       mermaidGraphDiv.innerHTML = 'Error loading map.';
     }
   }
-  // --- END OF NEW STORY MAP LOGIC ---
+
+  // --- 12. THIS IS WHAT STARTS EVERYTHING ---
+  renderPage('page_1');
 
 });
