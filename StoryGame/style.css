@@ -3,7 +3,7 @@
 /* * 1. VARIABLES
  */
 :root {
-  /* --- Light Mode (Your Old Theme) --- */
+  /* --- Light Mode --- */
   --bg-color: #f7f7f7;
   --text-color: #333;
   --title-color: #4a4a4a;
@@ -26,7 +26,7 @@
 }
 
 body.dark-mode {
-  /* --- Dark Mode (Your Friend's "Darktech" Theme) --- */
+  /* --- Dark Mode ("Darktech" Theme) --- */
   --bg-color: #111827;
   --text-color: #d1d5db;
   --title-color: #ffffff;
@@ -49,9 +49,8 @@ body.dark-mode {
 }
 
 
-/* * 2. GLOBAL STYLES (Using Variables)
+/* * 2. GLOBAL STYLES
  */
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: var(--bg-color);
@@ -72,10 +71,14 @@ h1 {
 h3 {
   color: var(--h3-color);
   font-weight: 500;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+h3:first-child {
   margin-top: 0;
 }
 
-/* 3. NEW CARD STYLE */
+/* 3. CARD & LAYOUT */
 .card {
   background-color: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -86,12 +89,31 @@ h3 {
   transition: background-color 0.3s;
 }
 
+.main-content-wrapper {
+  display: flex;
+  gap: 25px;
+}
+.main-column {
+  flex: 3;
+  min-width: 0;
+}
+.sidebar-column {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 768px) {
+  .main-content-wrapper {
+    flex-direction: column;
+  }
+}
+
 #story-text {
   font-size: 1.15em;
   line-height: 1.7;
+  white-space: pre-wrap; /* Preserves line breaks in story */
 }
 
-/* 4. BUTTONS (Using new "Darktech" base) */
+/* 4. BUTTONS */
 button {
   background-color: var(--primary-btn-bg);
   color: var(--button-text-color);
@@ -104,15 +126,16 @@ button {
   margin: 5px;
   transition: all 0.2s ease-in-out;
 }
-
 button:hover {
   background-color: var(--primary-btn-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* 5. FORMS (Using new "Darktech" base) */
+/* 5. FORMS */
 input[type="text"],
+input[type="email"],
+input[type="password"],
 textarea {
   width: 100%;
   padding: 12px;
@@ -124,23 +147,21 @@ textarea {
   margin-bottom: 15px;
   box-sizing: border-box;
 }
-
 input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
 textarea::placeholder {
   color: var(--input-placeholder-color);
   opacity: 1;
 }
 
-/* 6. GAME-SPECIFIC BUTTON STYLES */
-
-/* Navigation */
+/* 6. NAVIGATION BUTTONS */
 #go-start-button,
 #go-back-button,
 #theme-toggle-button,
 #open-map-button {
   background-color: var(--secondary-btn-bg);
 }
-
 #go-start-button:hover,
 #go-back-button:hover,
 #theme-toggle-button:hover,
@@ -148,87 +169,107 @@ textarea::placeholder {
   background-color: var(--secondary-btn-hover);
 }
 
-/* Submit */
+/* 7. SUBMIT BUTTON */
 #add-choice-button {
   background-color: var(--submit-btn-bg);
   width: 100%;
 }
-
 #add-choice-button:hover {
   background-color: var(--submit-btn-hover);
 }
 
-/* Like/Sort */
+/* 8. LIKE/SORT/CHOICE STYLES */
 .choice-container {
   display: flex;
   align-items: center;
+  flex-wrap: wrap; /* Allows wrapping on small screens */
   margin-bottom: 10px;
   padding: 5px;
 }
-
 .choice-button {
   flex-grow: 1;
   text-align: left;
   margin-right: 10px;
+  min-width: 150px; /* Ensures button isn't too squished */
 }
-
 .like-button {
   flex-shrink: 0;
   background-color: var(--secondary-btn-bg);
   padding: 8px 12px;
 }
-
 .like-button:hover {
   background-color: var(--secondary-btn-hover);
 }
-
 .like-count {
   flex-shrink: 0;
   margin-left: 10px;
   min-width: 60px;
   font-weight: bold;
 }
-
-#sort-controls {
-  padding: 10px 0;
-}
-
-#sort-controls button {
-  background-color: var(--secondary-btn-bg);
-  padding: 8px 12px;
-  opacity: 0.6;
-}
-
-#sort-controls button.sort-active {
-  background-color: var(--primary-btn-bg);
-  opacity: 1.0;
-}
-
 .like-button.liked {
   background-color: var(--primary-btn-bg);
   opacity: 0.7;
   cursor: not-allowed;
 }
 
-/* Remove old form styles */
-#add-choice-form {
-  background-color: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
+#sort-controls {
+  padding: 10px 0;
+}
+#sort-controls button {
+  background-color: var(--secondary-btn-bg);
+  padding: 8px 12px;
+  opacity: 0.6;
+}
+#sort-controls button.sort-active {
+  background-color: var(--primary-btn-bg);
+  opacity: 1.0;
 }
 
-/* * 7. LAYOUT STYLES (Omitted, but yours would be here) */
+/* 9. AUTH STYLES */
+.creator-info {
+  flex-shrink: 0;
+  margin-left: 15px;
+  font-size: 0.9em;
+  opacity: 0.7;
+  min-width: 100px;
+  text-align: right;
+  flex-grow: 1;
+}
+#auth-card hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 20px 0;
+}
+#auth-card button {
+  width: 100%;
+}
+#auth-error {
+  color: #ef4444; /* Bright red */
+  font-size: 0.9em;
+  margin-top: 15px;
+  text-align: center;
+}
+#user-info-card {
+  text-align: center;
+}
+#user-info-card p {
+  font-size: 1.1em;
+  margin-top: 0;
+  word-break: break-all;
+}
+#logout-button {
+  width: 100%;
+  background-color: var(--secondary-btn-bg);
+}
+#logout-button:hover {
+  background-color: var(--secondary-btn-hover);
+}
 
-
-/* * 8. NEW FEATURE STYLES */
-
-/* Story Image */
+/* 10. NEW: IMAGE STYLES */
 #story-image-container {
   width: 100%;
   margin-bottom: 20px;
 }
-
 #story-image {
   width: 100%;
   border-radius: 8px;
@@ -237,7 +278,7 @@ textarea::placeholder {
   border: 1px solid var(--card-border);
 }
 
-/* Story Map Modal (Pop-up) */
+/* 11. NEW: STORY MAP MODAL STYLES */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -250,7 +291,6 @@ textarea::placeholder {
   justify-content: center;
   z-index: 1000;
 }
-
 .modal-content {
   background: var(--card-bg);
   color: var(--text-color);
@@ -261,10 +301,8 @@ textarea::placeholder {
   height: 80%;
   position: relative;
   border: 1px solid var(--card-border);
-  overflow: auto;
-  /* This enables scrolling */
+  overflow: auto; /* Enables scrolling for large maps */
 }
-
 #close-map-button {
   position: absolute;
   top: 10px;
@@ -277,96 +315,60 @@ textarea::placeholder {
   padding: 0;
   margin: 0;
 }
-
 #close-map-button:hover {
   color: var(--text-color);
   background: none;
   transform: none;
   box-shadow: none;
 }
-
-/* This makes sure the mermaid graph looks good in dark mode */
-body.dark-mode .mermaid {
-  background-color: #1f2937;
-}
-
-/* This styles the SVG graph elements */
-.mermaid svg {
-  max-width: none;
-  /* Lets the graph be its natural size */
-}
-
-
-/* --- 9. Styled Scrollbar for Modal --- */
-
-/* Firefox specific scrollbar styling */
-.modal-content {
-  scrollbar-color: var(--secondary-btn-bg) var(--card-bg);
-  scrollbar-width: thin;
-}
-
-/* WebKit (Chrome, Safari, Edge) specific scrollbar styling */
 .modal-content::-webkit-scrollbar {
   width: 12px;
 }
-
 .modal-content::-webkit-scrollbar-track {
   background: var(--card-bg);
   border-radius: 6px;
 }
-
 .modal-content::-webkit-scrollbar-thumb {
   background-color: var(--secondary-btn-bg);
   border-radius: 6px;
   border: 3px solid var(--card-bg);
 }
 
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background-color: var(--secondary-btn-hover);
+/* 12. NEW: MERMAID (MAP) NODE STYLING */
+body.dark-mode .mermaid {
+  background-color: #1f2937;
 }
-
-/* --- 10. Story Map Node Styling (with clickable styles) --- */
-
-/* This styles the nodes (boxes) in the map */
-.mermaid .node rect,
+.mermaid svg {
+  max-width: none;
+}
+.mermaid .node rect {
+  cursor: pointer; /* Makes it a hand cursor */
+  transition: fill 0.2s ease;
+}
 .mermaid .node polygon {
   fill: var(--input-bg-color);
   stroke: var(--input-border-color);
   stroke-width: 2px;
-
-  /* This makes it look clickable */
   cursor: pointer;
   transition: fill 0.2s ease;
 }
-
-/* This adds a hover effect for clickable nodes */
-.mermaid .node:hover rect,
+.mermaid .node:hover rect {
+  fill: var(--card-bg); /* Changes color on hover */
+}
 .mermaid .node:hover polygon {
   fill: var(--card-bg);
-  /* Use the slightly lighter card background */
 }
-
-/* This styles the text inside the nodes */
 .mermaid .node .label {
   color: var(--text-color) !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 500;
 }
-
-/* This styles the text on the arrows (the choices) */
 .mermaid .edgeLabel {
   background-color: var(--card-bg);
   color: var(--text-color) !important;
   font-weight: 300;
   padding: 2px;
 }
-
-/* This styles the arrowheads */
-.mermaid .arrowheadPath {
-  fill: var(--border-color);
-}
-
-/* This styles the arrow lines */
 .mermaid .edgePath .path {
   stroke: var(--border-color);
   stroke-width: 1.5px;
