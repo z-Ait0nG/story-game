@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Our Story Game</title>
@@ -5,52 +6,66 @@
   </head>
   <body>
 
-<h1>The Adventure Begins</h1>
+    <h1>The Adventure Begins</h1>
 
     <div id="navigation">
       <button id="go-back-button" style="display: none;">&larr; Go Back</button>
       <button id="go-start-button">Go to Start</button>
+      <button id="theme-toggle-button">Toggle Theme</button>
     </div>
-    <p id="story-text">Loading story...</p>
 
-    <p id="story-text">Loading story...</p>
+    <div id="sort-controls">
+      <strong>Sort by:</strong>
+      <button id="sort-popular-button" class="sort-active">Popular</button>
+      <button id="sort-newest-button">Newest</button>
+    </div>
 
-    <div id="choices-container">
+    <div class="main-content-wrapper">
+
+      <div class="main-column">
+        <div class="card">
+          <p id="story-text">Loading story...</p>
+          <div id="choices-container">
+            </div>
+        </div>
       </div>
 
+      <div class="sidebar-column">
+        <div class="card">
+          <div id="add-choice-form">
+            <h3>Build a new path:</h3>
+            
+            <input 
+              type="text" 
+              id="new-choice-text" 
+              placeholder="Type the *choice* text here...">
+            
+            <h3>...and write the story:</h3>
+            <textarea 
+              id="new-story-text" 
+              placeholder="Type the *story* for the new page..."></textarea>
+          
+            <button id="add-choice-button">Submit New Path</button>
+          </div>
+        </div>
+      </div>
 
-  <div id="add-choice-form">
-  
-  <h3>Build a new path:</h3>
-  
-  <input 
-    type="text" 
-    id="new-choice-text" 
-    placeholder="Type the *choice* text here (e.g., 'Go to the library')">
-  
-  <h3>...and write the story for that choice:</h3>
-  <textarea 
-    id="new-story-text" 
-    placeholder="Type the *story* for the new page here..."></textarea>
-  <button id="add-choice-button">Submit New Path</button>
-
-</div>
-
-
+    </div>
     <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
 
     <script>
+      // PASTE YOUR FIREBASE CONFIG "KEY" HERE
       const firebaseConfig = {
-  apiKey: "AIzaSyBmdL3CjY0g3kDAQa--TcnBvRXhJGmVe_s",
-  authDomain: "my-story-game-8998f.firebaseapp.com",
-  databaseURL: "https://my-story-game-8998f-default-rtdb.firebaseio.com",
-  projectId: "my-story-game-8998f",
-  storageBucket: "my-story-game-8998f.firebasestorage.app",
-  messagingSenderId: "128290584389",
-  appId: "1:128290584389:web:3de4e54b25001d9989702c",
-  measurementId: "G-5KBCHH0MQ0"
-};
+        apiKey: "AIzaSyBmdL3CjY0g3kDAQa--TcnBvRXhJGmVe_s",
+        authDomain: "my-story-game-8998f.firebaseapp.com",
+        databaseURL: "https://my-story-game-8998f-default-rtdb.firebaseio.com",
+        projectId: "my-story-game-8998f",
+        storageBucket: "my-story-game-8998f.firebasestorage.app",
+        messagingSenderId: "128290584389",
+        appId: "1:128290584389:web:3de4e54b25001d9989702c",
+        measurementId: "G-5KBCHH0MQ0"
+      };
       
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
