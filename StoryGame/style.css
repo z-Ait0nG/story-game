@@ -1,0 +1,84 @@
+/* ---- Copy-paste this into your style.css file ---- */
+
+/* 1. Main page styles */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f7f7f7; /* Light gray background */
+  color: #333; /* Darker text */
+  
+  /* This centers your whole game on the page! */
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* 2. Title */
+h1 {
+  color: #4a4a4a;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+/* 3. Story text */
+#story-text {
+  font-size: 1.2em; /* Makes story text bigger */
+  line-height: 1.6; /* More spacing between lines */
+}
+
+/* 4. ALL Buttons (choices, nav, submit) */
+button {
+  background-color: #007bff; /* A nice blue */
+  color: white;
+  border: none;
+  border-radius: 5px; /* Rounded corners */
+  padding: 12px 18px; /* Bigger buttons */
+  font-size: 1em;
+  cursor: pointer; /* Turns mouse to a hand */
+  margin: 5px; /* Adds space between buttons */
+  transition: background-color 0.2s; /* Smooth color change on hover */
+}
+
+/* 5. Make buttons darken when you hover */
+button:hover {
+  background-color: #0056b3;
+}
+
+/* 6. Make "Go Back" button different */
+#go-back-button {
+  background-color: #6c757d; /* A gray color */
+}
+#go-back-button:hover {
+  background-color: #5a6268;
+}
+
+/* 7. The "Build a Path" Form */
+#add-choice-form {
+  background-color: #ffffff; /* White card */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 30px; /* Space it out from the story */
+}
+
+/* 8. Text boxes */
+input[type="text"],
+textarea {
+  width: 100%; /* Make them fill the form */
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 15px; /* Space between the boxes */
+  
+  /* This is a key fix for layout */
+  box-sizing: border-box; 
+}
+
+/* 9. The "Submit" button in the form */
+#add-choice-button {
+  background-color: #28a745; /* A green color */
+  width: 100%; /* Make it fill the form */
+}
+#add-choice-button:hover {
+  background-color: #218838;
+}
