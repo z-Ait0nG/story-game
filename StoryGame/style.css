@@ -1,84 +1,235 @@
-/* ---- Copy-paste this into your style.css file ---- */
+/* --- Complete Merged CSS --- */
 
-/* 1. Main page styles */
+/* * 1. VARIABLES
+ */
+:root {
+  /* --- Light Mode (Your Old Theme) --- */
+  --bg-color: #f7f7f7;
+  --text-color: #333;
+  --title-color: #4a4a4a;
+  --h3-color: #333;
+  --border-color: #eee;
+  --button-text-color: white;
+  --primary-btn-bg: #007bff;
+  --primary-btn-hover: #0056b3;
+  --secondary-btn-bg: #6c757d;
+  --secondary-btn-hover: #5a6268;
+  --submit-btn-bg: #28a745;
+  --submit-btn-hover: #218838;
+  --card-bg: #ffffff;
+  --card-border: #ddd;
+  --input-bg-color: white;
+  --input-border-color: #ccc;
+  --input-text-color: #333;
+  --input-placeholder-color: #999;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode {
+  /* --- Dark Mode (Your Friend's "Darktech" Theme) --- */
+  --bg-color: #111827;
+  --text-color: #d1d5db;
+  --title-color: #ffffff;
+  --h3-color: #ffffff;
+  --border-color: #374151;
+  --button-text-color: white;
+  --primary-btn-bg: #4f46e5;
+  --primary-btn-hover: #6366f1;
+  --secondary-btn-bg: #4b5563;
+  --secondary-btn-hover: #6b7280;
+  --submit-btn-bg: #10b981;
+  --submit-btn-hover: #059669;
+  --card-bg: #1f2937;
+  --card-border: #374151;
+  --input-bg-color: #374151;
+  --input-border-color: #4b5563;
+  --input-text-color: #ffffff;
+  --input-placeholder-color: #9ca3af;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+
+/* * 2. GLOBAL STYLES (Using Variables)
+ */
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #f7f7f7; /* Light gray background */
-  color: #333; /* Darker text */
-  
-  /* This centers your whole game on the page! */
-  max-width: 700px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  max-width: 1100px;
   margin: 0 auto;
   padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-/* 2. Title */
 h1 {
-  color: #4a4a4a;
-  border-bottom: 2px solid #eee;
+  color: var(--title-color);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 10px;
+  font-weight: 600;
 }
 
-/* 3. Story text */
+h3 {
+  color: var(--h3-color);
+  font-weight: 500;
+  margin-top: 0;
+}
+
+/* 3. NEW CARD STYLE */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 25px;
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s;
+}
+
 #story-text {
-  font-size: 1.2em; /* Makes story text bigger */
-  line-height: 1.6; /* More spacing between lines */
+  font-size: 1.15em;
+  line-height: 1.7;
 }
 
-/* 4. ALL Buttons (choices, nav, submit) */
+/* 4. BUTTONS (Using new "Darktech" base) */
 button {
-  background-color: #007bff; /* A nice blue */
-  color: white;
+  background-color: var(--primary-btn-bg);
+  color: var(--button-text-color);
   border: none;
-  border-radius: 5px; /* Rounded corners */
-  padding: 12px 18px; /* Bigger buttons */
-  font-size: 1em;
-  cursor: pointer; /* Turns mouse to a hand */
-  margin: 5px; /* Adds space between buttons */
-  transition: background-color 0.2s; /* Smooth color change on hover */
-}
-
-/* 5. Make buttons darken when you hover */
-button:hover {
-  background-color: #0056b3;
-}
-
-/* 6. Make "Go Back" button different */
-#go-back-button {
-  background-color: #6c757d; /* A gray color */
-}
-#go-back-button:hover {
-  background-color: #5a6268;
-}
-
-/* 7. The "Build a Path" Form */
-#add-choice-form {
-  background-color: #ffffff; /* White card */
-  border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 20px;
-  margin-top: 30px; /* Space it out from the story */
+  padding: 12px 18px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 5px;
+  transition: all 0.2s ease-in-out;
 }
 
-/* 8. Text boxes */
+button:hover {
+  background-color: var(--primary-btn-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* 5. FORMS (Using new "Darktech" base) */
 input[type="text"],
 textarea {
-  width: 100%; /* Make them fill the form */
-  padding: 10px;
+  width: 100%;
+  padding: 12px;
   font-size: 1em;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-bottom: 15px; /* Space between the boxes */
-  
-  /* This is a key fix for layout */
-  box-sizing: border-box; 
+  background-color: var(--input-bg-color);
+  color: var(--input-text-color);
+  border: 1px solid var(--input-border-color);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
 }
 
-/* 9. The "Submit" button in the form */
+input[type="text"]::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder-color);
+  opacity: 1;
+}
+
+/* 6. GAME-SPECIFIC BUTTON STYLES */
+
+/* Navigation */
+#go-start-button,
+#go-back-button,
+#theme-toggle-button {
+  background-color: var(--secondary-btn-bg);
+}
+#go-start-button:hover,
+#go-back-button:hover,
+#theme-toggle-button:hover {
+  background-color: var(--secondary-btn-hover);
+}
+
+/* Submit */
 #add-choice-button {
-  background-color: #28a745; /* A green color */
-  width: 100%; /* Make it fill the form */
+  background-color: var(--submit-btn-bg);
+  width: 100%;
 }
 #add-choice-button:hover {
-  background-color: #218838;
+  background-color: var(--submit-btn-hover);
+}
+
+/* Like/Sort */
+.choice-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  /* Removed card styles, as it's now IN a card */
+  padding: 5px;
+}
+.choice-button {
+  flex-grow: 1;
+  text-align: left;
+  margin-right: 10px;
+}
+.like-button {
+  flex-shrink: 0;
+  background-color: var(--secondary-btn-bg);
+  padding: 8px 12px;
+}
+.like-button:hover {
+  background-color: var(--secondary-btn-hover);
+}
+.like-count {
+  flex-shrink: 0;
+  margin-left: 10px;
+  min-width: 60px;
+  font-weight: bold;
+}
+#sort-controls {
+  padding: 10px 0;
+}
+#sort-controls button {
+  background-color: var(--secondary-btn-bg);
+  padding: 8px 12px;
+  opacity: 0.6;
+}
+#sort-controls button.sort-active {
+  background-color: var(--primary-btn-bg);
+  opacity: 1.0;
+}
+.like-button.liked {
+  background-color: var(--primary-btn-bg);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Remove old form styles */
+#add-choice-form {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* --- Add this to the bottom of your style.css --- */
+
+/* 18. The new Flexbox Layout */
+.main-content-wrapper {
+  display: flex; /* This is the magic! */
+  gap: 25px; /* Creates a nice space between the columns */
+}
+
+/* 19. The Main (left) Column */
+.main-column {
+  flex: 3; /* <-- This makes it take up 3/4 of the space */
+  min-width: 0;
+}
+
+/* 20. The Sidebar (right) Column */
+.sidebar-column {
+  flex: 1; /* This makes it take up 1/3 of the space */
+  min-width: 0;
+}
+
+/* 21. IMPORTANT: Make it stack on mobile phones! */
+@media (max-width: 768px) {
+  .main-content-wrapper {
+    flex-direction: column; /* On small screens, stack them again */
+  }
 }
