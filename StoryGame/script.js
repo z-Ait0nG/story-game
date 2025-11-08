@@ -1,3 +1,44 @@
+// --- THIS IS YOUR NEW HELPER FUNCTION ---
+function normalizeText(text) {
+  
+  // 1. Make it all lowercase
+  let normalized = text.toLowerCase();
+  
+  // 2. Define our "leet speak" swaps
+  const swaps = {
+    '0': 'o',
+    '@': 'a',
+    '4': 'a',
+    '3': 'e',
+    '1': 'i',
+    '!': 'i',
+    '$': 's',
+    '5': 's'
+  };
+  
+  // 3. Loop through the swaps and replace them
+  for (const char in swaps) {
+    normalized = normalized.replaceAll(char, swaps[char]);
+  }
+  
+  // 4. Squash repeating letters (e.g., "poooop" -> "pop")
+  // This regex finds any character followed by itself and replaces
+  // the whole group (like "aaaa") with just one ("a").
+  normalized = normalized.replace(/([a-z])\1+/g, '$1');
+  
+  // 5. Remove all spaces and punctuation
+  normalized = normalized.replace(/[^a-z]/g, '');
+  
+  return normalized;
+}
+// --- END OF HELPER FUNCTION ---
+
+
+// Your old code starts here:
+document.addEventListener("DOMContentLoaded", function() {
+  // ... (rest of your file) ...
+});
+
 document.addEventListener("DOMContentLoaded", function() {
 
   // --- 1. Connect to our database ---
@@ -65,8 +106,9 @@ document.addEventListener("DOMContentLoaded", function() {
   } // --- END OF "renderPage" FUNCTION ---
 
 
-  // --- 4. "ADD CHOICE" BUTTON LOGIC ---
+// --- 4. "ADD CHOICE" BUTTON LOGIC (WITH NORMALIZER!) ---
   addChoiceButton.addEventListener('click', function() {
+    
     const choiceText = newChoiceInput.value;
     const storyText = newStoryInput.value;
     
@@ -75,8 +117,32 @@ document.addEventListener("DOMContentLoaded", function() {
       return; 
     }
 
+    // -----------------------------------------------------------------
+    // --- THIS IS THE NEW FILTER LOGIC ---
+    // -----------------------------------------------------------------
+    const blocklist = ["shit", "fuck", "bitch", "nigger", "drugs", "ass", ]; // Your list can stay simple!
+    
+    // 1. Normalize the *user's* text
+    const normalizedInput = normalizeText(choiceText + " " + storyText);
+
+    // 2. Check the *normalized* text against the blocklist
+    for (let i = 0; i < blocklist.length; i++) {
+      const blockedWord = blocklist[i];
+      
+      // We don't need to normalize the blocklist since it's already clean
+      if (normalizedInput.includes(blockedWord)) {
+        // If we find a bad word:
+        alert("Whoops! Please use appropriate language and try again.");
+        return; // STOPS the function
+      }
+    }
+    // -----------------------------------------------------------------
+    // --- END OF NEW FILTER LOGIC ---
+    // -----------------------------------------------------------------
+
+    // This code below will only run if no bad words were found
     const newPageRef = database.ref('pages').push();
-    const newPageId = newPageRef.key;
+    const newPageId = newPageId = newPageRef.key;
     
     newPageRef.set({ story_text: storyText });
 
@@ -90,7 +156,6 @@ document.addEventListener("DOMContentLoaded", function() {
     newChoiceInput.value = "";
     newStoryInput.value = "";
   });
-
 
   // --- 5. NEW NAVIGATION BUTTONS ---
   
