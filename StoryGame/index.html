@@ -1,119 +1,121 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Our Story Game</title>
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
 
-    <h1>The Adventure Begins</h1>
+<head>
+  <meta charset="UTF-8">
+  <title>Our Story Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 
-    <div id="navigation">
-      <button id="go-back-button" style="display: none;">&larr; Go Back</button>
-      <button id="go-start-button">Go to Start</button>
-      <button id="theme-toggle-button">Toggle Theme</button>
-      <button id="open-map-button">Story Map</button>
+<body>
+
+  <h1>The Adventure Begins</h1>
+
+  <div id="navigation">
+    <button id="go-back-button" style="display: none;">&larr; Go Back</button>
+    <button id="go-start-button">Go to Start</button>
+    <button id="theme-toggle-button">Toggle Theme</button>
+    <button id="open-map-button">Story Map</button>
+  </div>
+
+  <div id="sort-controls">
+    <strong>Sort by:</strong>
+    <button id="sort-popular-button" class="sort-active">Popular</button>
+    <button id="sort-newest-button">Newest</button>
+  </div>
+
+  <div class="main-content-wrapper">
+
+    <div class="main-column">
+      <div class="card">
+        <div id="story-image-container"></div>
+
+        <p id="story-text">Loading story...</p>
+        <div id="choices-container">
+        </div>
+      </div>
     </div>
 
-    <div id="sort-controls">
-      <strong>Sort by:</strong>
-      <button id="sort-popular-button" class="sort-active">Popular</button>
-      <button id="sort-newest-button">Newest</button>
-    </div>
+    <div class="sidebar-column">
 
-    <div class="main-content-wrapper">
+      <div class="card" id="auth-card">
+        <div id="signup-form">
+          <h3>Create an Account</h3>
+          <input type="text" id="signup-username" placeholder="Username">
+          <input type="email" id="signup-email" placeholder="Email">
+          <input type="password" id="signup-password" placeholder="Password">
+          <button id="signup-button">Sign Up</button>
 
-      <div class="main-column">
-        <div class="card">
-          <div id="story-image-container"></div>
-          
-          <p id="story-text">Loading story...</p>
-          <div id="choices-container">
-            </div>
+          <p class="auth-toggle">Already have an account? <a href="#" id="show-login-link">Log In</a></p>
+        </div>
+
+        <div id="login-form" style="display: none;">
+          <h3>Log In</h3>
+          <input type="text" id="login-username" placeholder="Username">
+          <input type="password" id="login-password" placeholder="Password">
+          <button id="login-button">Log In</button>
+
+          <p class="auth-toggle">Don't have an account? <a href="#" id="show-signup-link">Sign Up</a></p>
+        </div>
+
+        <p id="auth-error"></p>
+      </div>
+
+      <div class="card" id="user-info-card" style="display: none;">
+        <p>Welcome, <strong id="user-email-display"></strong>!</p>
+        <button id="logout-button">Log Out</button>
+      </div>
+
+      <div class="card" id="build-card" style="display: none;">
+        <div id="add-choice-form">
+          <h3>Build a new path:</h3>
+          <input type="text" id="new-choice-text" placeholder="Type the *choice* text here...">
+
+          <h3>...and write the story:</h3>
+          <textarea id="new-story-text" placeholder="Type the *story* for the new page..."></textarea>
+
+          <h3>...and add an image (optional):</h3>
+          <input type="text" id="new-image-url" placeholder="Paste image URL here (e.g., https://.../img.png)">
+
+          <button id="add-choice-button">Submit New Path</button>
         </div>
       </div>
 
-      <div class="sidebar-column">
-
-        <div class="card" id="auth-card">
-          <div id="signup-form">
-            <h3>Create an Account</h3>
-            <input type="text" id="signup-username" placeholder="Username">
-            <input type="email" id="signup-email" placeholder="Email">
-            <input type="password" id="signup-password" placeholder="Password">
-            <button id="signup-button">Sign Up</button>
-          </div>
-          <hr>
-          <div id="login-form">
-            <h3>Log In</h3>
-            <input type="text" id="login-username" placeholder="Username">
-            <input type="password" id="login-password" placeholder="Password">
-            <button id="login-button">Log In</button>
-          </div>
-          <p id="auth-error"></p>
-        </div>
-
-        <div class="card" id="user-info-card" style="display: none;">
-          <p>Welcome, <strong id="user-email-display"></strong>!</p>
-          <button id="logout-button">Log Out</button>
-        </div>
-        
-        <div class="card" id="build-card" style="display: none;">
-          <div id="add-choice-form">
-            <h3>Build a new path:</h3>
-            <input 
-              type="text" 
-              id="new-choice-text" 
-              placeholder="Type the *choice* text here...">
-            
-            <h3>...and write the story:</h3>
-            <textarea 
-              id="new-story-text" 
-              placeholder="Type the *story* for the new page..."></textarea>
-            
-            <h3>...and add an image (optional):</h3>
-            <input
-              type="text"
-              id="new-image-url"
-              placeholder="Paste image URL here (e.g., https://.../img.png)">
-          
-            <button id="add-choice-button">Submit New Path</button>
-          </div>
-        </div>
-        
-      </div> </div> <div id="map-modal" class="modal-overlay" style="display: none;">
-      <div class="modal-content">
-        <button id="close-map-button">&times;</button>
-        <h3>Story Map</h3>
-        <div id="mermaid-graph">Loading map...</div>
-      </div>
     </div>
+  </div>
+  <div id="map-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <button id="close-map-button">&times;</button>
+      <h3>Story Map</h3>
+      <div id="mermaid-graph">Loading map...</div>
+    </div>
+  </div>
 
 
-    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.8/dist/mermaid.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
 
-    <script>
-      // PASTE YOUR FIREBASE CONFIG "KEY" HERE
-      const firebaseConfig = {
-        apiKey: "AIzaSyBmdL3CjY0g3kDAQa--TcnBvRXhJGmVe_s",
-        authDomain: "my-story-game-8998f.firebaseapp.com",
-        databaseURL: "https://my-story-game-8998f-default-rtdb.firebaseio.com/",
-        projectId: "my-story-game-8998f",
-        storageBucket: "my-story-game-8998f.firebasestorage.app",
-        messagingSenderId: "128290584389",
-        appId: "1:128290584389:web:3de4e54b25001d9989702c",
-        measurementId: "G-5KBCHH0MQ0"
-      };
-      
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-    </script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.8/dist/mermaid.min.js"></script>
 
-    <script src="script.js"></script>
+  <script>
+    // PASTE YOUR FIREBASE CONFIG "KEY" HERE
+    const firebaseConfig = {
+      apiKey: "AIzaSyBmdL3CjY0g3kDAQa--TcnBvRXhJGmVe_s",
+      authDomain: "my-story-game-8998f.firebaseapp.com",
+      databaseURL: "https://my-story-game-8998f-default-rtdb.firebaseio.com/",
+      projectId: "my-story-game-8998f",
+      storageBucket: "my-story-game-8998f.firebasestorage.app",
+      messagingSenderId: "128290584389",
+      appId: "1:128290584389:web:3de4e54b25001d9989702c",
+      measurementId: "G-5KBCHH0MQ0"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 
-  </body>
+  <script src="script.js"></script>
+
+</body>
+
 </html>
