@@ -142,8 +142,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // This code below will only run if no bad words were found
     const newPageRef = database.ref('pages').push();
-    const newPageId = newPageId = newPageRef.key;
-    
+    // --- THIS IS THE FIXED LINE ---
+    const newPageId = newPageRef.key;    
     newPageRef.set({ story_text: storyText });
 
     const newChoice = {
