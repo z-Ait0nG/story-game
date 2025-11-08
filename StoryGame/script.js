@@ -1,43 +1,15 @@
 // --- THIS IS YOUR NEW HELPER FUNCTION ---
 function normalizeText(text) {
-  
-  // 1. Make it all lowercase
   let normalized = text.toLowerCase();
-  
-  // 2. Define our "leet speak" swaps
-  const swaps = {
-    '0': 'o',
-    '@': 'a',
-    '4': 'a',
-    '3': 'e',
-    '1': 'i',
-    '!': 'i',
-    '$': 's',
-    '5': 's'
-  };
-  
-  // 3. Loop through the swaps and replace them
+  const swaps = {'0':'o','@':'a','4':'a','3':'e','1':'i','!':'i','$':'s','5':'s'};
   for (const char in swaps) {
     normalized = normalized.replaceAll(char, swaps[char]);
   }
-  
-  // 4. Squash repeating letters (e.g., "poooop" -> "pop")
-  // This regex finds any character followed by itself and replaces
-  // the whole group (like "aaaa") with just one ("a").
   normalized = normalized.replace(/([a-z])\1+/g, '$1');
-  
-  // 5. Remove all spaces and punctuation
   normalized = normalized.replace(/[^a-z]/g, '');
-  
   return normalized;
 }
-// --- END OF HELPER FUNCTION ---
 
-
-// Your old code starts here:
-document.addEventListener("DOMContentLoaded", function() {
-  // ... (rest of your file) ...
-});
 
 document.addEventListener("DOMContentLoaded", function() {
 
@@ -50,32 +22,33 @@ document.addEventListener("DOMContentLoaded", function() {
   const newChoiceInput = document.getElementById('new-choice-text');
   const newStoryInput = document.getElementById('new-story-text');
   const addChoiceButton = document.getElementById('add-choice-button');
-  
-  // --- THIS IS ALL NEW! ---
   const goBackButton = document.getElementById('go-back-button');
   const goStartButton = document.getElementById('go-start-button');
+  const themeToggleButton = document.getElementById('theme-toggle-button');
+  const sortPopularButton = document.getElementById('sort-popular-button');
+  const sortNewestButton = document.getElementById('sort-newest-button');
   
-  let pageHistory = []; // Our new "memory" array
+  let pageHistory = [];
   let currentPageId = null;
-  // --- END OF NEW ---
+  let currentSortMode = 'popular'; // 'popular' or 'newest'
 
 
-  // --- 3. Our "machine" to render a page ---
+  // --- 3. Our "machine" to render a page (UPGRADED FOR LIKES) ---
   function renderPage(pageId) {
     currentPageId = pageId;
-    pageHistory.push(pageId); // Add this page to our memory
-
-    // --- NEW: Show or hide the back button ---
-    if (pageHistory.length > 1) {
-      goBackButton.style.display = 'inline-block'; // Show it
-    } else {
-      goBackButton.style.display = 'none'; // Hide it
+    if (pageId === 'page_1') {
+      pageHistory = ['page_1'];
+    } else if (pageHistory[pageHistory.length - 1] !== pageId) {
+      pageHistory.push(pageId);
     }
-    // --- END OF NEW ---
+
+    goBackButton.style.display = (pageHistory.length > 1) ? 'inline-block' : 'none';
     
+    database.ref().off(); 
     const pageRef = database.ref('pages/' + pageId);
     
     pageRef.on('value', function(snapshot) {
+      
       const pageData = snapshot.val();
       
       if (!pageData) {
@@ -88,67 +61,117 @@ document.addEventListener("DOMContentLoaded", function() {
       choicesContainer.innerHTML = "";
       
       const choices = pageData.choices;
+      
+      document.getElementById('add-choice-form').style.display = 'block';
+
       if (choices) {
-        document.getElementById('add-choice-form').style.display = 'block';
+        // --- Get the list of liked choices from browser memory ---
+        let likedChoices = localStorage.getItem('likedChoices');
+        likedChoices = likedChoices ? JSON.parse(likedChoices) : [];
+        // --- End of new part ---
+
+        let choicesArray = [];
         for (const choiceId in choices) {
-          const choice = choices[choiceId];
+          choicesArray.push({
+            id: choiceId,
+            ...choices[choiceId]
+          });
+        }
+        
+        if (currentSortMode === 'popular') {
+          choicesArray.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        } else {
+          choicesArray.reverse();
+        }
+        
+        choicesArray.forEach(choice => {
+          const choiceContainer = document.createElement('div');
+          choiceContainer.className = 'choice-container';
+          
           const newButton = document.createElement('button');
           newButton.innerText = choice.text;
+          newButton.className = 'choice-button';
           newButton.addEventListener('click', function() {
             renderPage(choice.leads_to_page);
           });
-          choicesContainer.appendChild(newButton);
-        }
-      } else {
-        document.getElementById('add-choice-form').style.display = 'block';
+          
+          const likeButton = document.createElement('button');
+          likeButton.innerText = '👍';
+          likeButton.className = 'like-button';
+          
+          // --- NEW LOGIC TO CHECK IF ALREADY LIKED ---
+          if (likedChoices.includes(choice.id)) {
+            likeButton.classList.add('liked'); // Add new CSS class
+            likeButton.disabled = true;       // Disable the button
+          }
+          // --- END OF NEW LOGIC ---
+          
+          likeButton.addEventListener('click', function() {
+            // Double-check just in case
+            let currentLikedChoices = localStorage.getItem('likedChoices');
+            currentLikedChoices = currentLikedChoices ? JSON.parse(currentLikedChoices) : [];
+
+            if (currentLikedChoices.includes(choice.id)) {
+              return; // Already liked, do nothing
+            }
+
+            // 1. Update Firebase
+            const currentLikes = choice.likes || 0;
+            const choiceRef = database.ref('pages/' + currentPageId + '/choices/' + choice.id);
+            choiceRef.update({ likes: currentLikes + 1 });
+            
+            // 2. "Stamp" the browser's memory
+            currentLikedChoices.push(choice.id);
+            localStorage.setItem('likedChoices', JSON.stringify(currentLikedChoices));
+            
+            // 3. Visually disable the button right away
+            likeButton.classList.add('liked');
+            likeButton.disabled = true;
+          });
+          
+          const likeCount = document.createElement('span');
+          likeCount.innerText = (choice.likes || 0) + ' likes';
+          likeCount.className = 'like-count';
+          
+          choiceContainer.appendChild(newButton);
+          choiceContainer.appendChild(likeButton);
+          choiceContainer.appendChild(likeCount);
+          choicesContainer.appendChild(choiceContainer);
+        });
       }
     });
   } // --- END OF "renderPage" FUNCTION ---
 
 
-// --- 4. "ADD CHOICE" BUTTON LOGIC (WITH NORMALIZER!) ---
+  // --- 4. "ADD CHOICE" BUTTON LOGIC (UPGRADED) ---
   addChoiceButton.addEventListener('click', function() {
     
     const choiceText = newChoiceInput.value;
-    const storyText = newStoryInput.value;
+    const storyText = newStoryInput.value; 
     
     if (choiceText === "" || storyText === "") {
       alert("Please fill out both the 'choice' and the 'story'!");
       return; 
     }
-
-    // -----------------------------------------------------------------
-    // --- THIS IS THE NEW FILTER LOGIC ---
-    // -----------------------------------------------------------------
-    const blocklist = ["shit", "fuck", "bitch", "nigger", "drugs", "ass", ]; // Your list can stay simple!
     
-    // 1. Normalize the *user's* text
+    const blocklist = ["poop", "silly", "badword"];
     const normalizedInput = normalizeText(choiceText + " " + storyText);
-
-    // 2. Check the *normalized* text against the blocklist
     for (let i = 0; i < blocklist.length; i++) {
-      const blockedWord = blocklist[i];
-      
-      // We don't need to normalize the blocklist since it's already clean
-      if (normalizedInput.includes(blockedWord)) {
-        // If we find a bad word:
+      if (normalizedInput.includes(blocklist[i])) {
         alert("Whoops! Please use appropriate language and try again.");
-        return; // STOPS the function
+        return;
       }
     }
-    // -----------------------------------------------------------------
-    // --- END OF NEW FILTER LOGIC ---
-    // -----------------------------------------------------------------
 
-    // This code below will only run if no bad words were found
     const newPageRef = database.ref('pages').push();
-    // --- THIS IS THE FIXED LINE ---
-    const newPageId = newPageRef.key;    
+    const newPageId = newPageRef.key;
+    
     newPageRef.set({ story_text: storyText });
 
     const newChoice = {
       text: choiceText,
-      leads_to_page: newPageId 
+      leads_to_page: newPageId,
+      likes: 0
     };
     
     database.ref('pages/' + currentPageId + '/choices').push(newChoice);
@@ -157,27 +180,39 @@ document.addEventListener("DOMContentLoaded", function() {
     newStoryInput.value = "";
   });
 
-  // --- 5. NEW NAVIGATION BUTTONS ---
-  
-  // When user clicks "Go to Start"
+
+  // --- 5. NAVIGATION BUTTONS ---
   goStartButton.addEventListener('click', function() {
-    pageHistory = []; // Wipe the memory
-    renderPage('page_1'); // Go to the start
+    renderPage('page_1');
   });
   
-  // When user clicks "Go Back"
   goBackButton.addEventListener('click', function() {
-    // 1. Remove the current page from memory
-    pageHistory.pop(); 
-    // 2. Get the new last page (which is the previous one)
-    const previousPageId = pageHistory.pop();
-    // 3. Go to that page (renderPage will add it back to the history)
-    renderPage(previousPageId);
+    pageHistory.pop(); // Remove current page
+    const previousPageId = pageHistory.pop(); // Get page before that
+    renderPage(previousPageId); // <-- THIS WAS THE SECOND BUG (previousPageEId)
   });
-  // --- END OF NEW ---
+  
+  themeToggleButton.addEventListener('click', function() {
+    document.body.classList.toggle('dark-mode');
+  });
+  
+  // --- 6. NEW SORT BUTTON LOGIC ---
+  sortPopularButton.addEventListener('click', function() {
+    currentSortMode = 'popular';
+    sortPopularButton.classList.add('sort-active');
+    sortNewestButton.classList.remove('sort-active');
+    renderPage(currentPageId);
+  });
+  
+  sortNewestButton.addEventListener('click', function() {
+    currentSortMode = 'newest';
+    sortNewestButton.classList.add('sort-active');
+    sortPopularButton.classList.remove('sort-active');
+    renderPage(currentPageId); // <-- THIS WAS YOUR BUG
+  });
+  
 
-
-  // --- 6. THIS IS WHAT STARTS EVERYTHING ---
+  // --- 7. THIS IS WHAT STARTS EVERYTHING ---
   renderPage('page_1');
 
 });
