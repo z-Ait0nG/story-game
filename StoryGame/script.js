@@ -15,10 +15,10 @@ function normalizeText(text) {
 let mapModal = null;
 let renderPage = null;
 
-window.goToPageFromMap = function(pageId) {
-//
-// --- END OF THE CHANGE ---
-//
+window.goToPageFromMap = function (pageId) {
+  //
+  // --- END OF THE CHANGE ---
+  //
 
   if (pageId && renderPage) {
     renderPage(pageId); // Call the main render function
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const userEmailDisplay = document.getElementById('user-email-display');
   const logoutButton = document.getElementById('logout-button');
   const buildCard = document.getElementById('build-card');
-  
+
   // Map Elements
   mapModal = document.getElementById('map-modal'); // Assign to global var
   const openMapButton = document.getElementById('open-map-button');
@@ -76,12 +76,12 @@ document.addEventListener("DOMContentLoaded", function () {
   let pageHistory = [];
   let currentPageId = null;
   let currentSortMode = 'popular';
-  
+
   // -------------------------------------------------------------------
   // --- 7. AUTHENTICATION LOGIC ---
   // -------------------------------------------------------------------
 
-  auth.onAuthStateChanged(function(user) {
+  auth.onAuthStateChanged(function (user) {
     if (user) {
       // User is LOGGED IN
       authCard.style.display = 'none';
@@ -99,11 +99,11 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // --- Sign Up Button ---
-  document.getElementById('signup-button').addEventListener('click', function() {
+  document.getElementById('signup-button').addEventListener('click', function () {
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
     const username = document.getElementById('signup-username').value;
-    
+
     if (username === "" || email === "" || password === "") {
       authError.innerText = "Please fill out all fields.";
       return;
@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // --- Log In Button ---
-  document.getElementById('login-button').addEventListener('click', function() {
+  document.getElementById('login-button').addEventListener('click', function () {
     const username = loginUsernameInput.value;
     const password = document.getElementById('login-password').value;
 
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // --- Log Out Button ---
-  logoutButton.addEventListener('click', function() {
+  logoutButton.addEventListener('click', function () {
     auth.signOut();
   });
 
@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // -------------------------------------------------------------------
   // --- 8. RENDERPAGE FUNCTION (MERGED) ---
   // -------------------------------------------------------------------
-  
+
   // Assign to the global variable so the map can call it
   renderPage = function (pageId) {
     currentPageId = pageId;
@@ -172,14 +172,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     goBackButton.style.display = (pageHistory.length > 1) ? 'inline-block' : 'none';
-    
-    database.ref().off(); 
+
+    database.ref().off();
     const pageRef = database.ref('pages/' + pageId);
-    
-    pageRef.on('value', function(snapshot) {
-      
+
+    pageRef.on('value', function (snapshot) {
+
       const pageData = snapshot.val();
-      
+
       // MERGED: Clear old image
       storyImageContainer.innerHTML = '';
 
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
         img.id = 'story-image';
         storyImageContainer.appendChild(img);
       }
-      
+
       const choices = pageData.choices;
       document.getElementById('add-choice-form').style.display = 'block';
 
@@ -211,32 +211,33 @@ document.addEventListener("DOMContentLoaded", function () {
         for (const choiceId in choices) {
           choicesArray.push({ id: choiceId, ...choices[choiceId] });
         }
-        
+
         if (currentSortMode === 'popular') {
           choicesArray.sort((a, b) => (b.likes || 0) - (a.likes || 0));
         } else {
           choicesArray.reverse();
         }
-        
+
         choicesArray.forEach(choice => {
           const choiceContainer = document.createElement('div');
           choiceContainer.className = 'choice-container';
-          
+
           const newButton = document.createElement('button');
           newButton.innerText = choice.text;
           newButton.className = 'choice-button';
           newButton.addEventListener('click', () => renderPage(choice.leads_to_page));
-          
+
           const likeButton = document.createElement('button');
-          likeButton.innerText = '👍';
+          // --- THIS IS THE CHANGED LINE ---
+          likeButton.innerText = '\u{1F44D}'; // Unicode for 👍
           likeButton.className = 'like-button';
-          
+
           if (likedChoices.includes(choice.id)) {
             likeButton.classList.add('liked');
             likeButton.disabled = true;
           }
-          
-          likeButton.addEventListener('click', function() {
+
+          likeButton.addEventListener('click', function () {
             let currentLikedChoices = localStorage.getItem('likedChoices');
             currentLikedChoices = currentLikedChoices ? JSON.parse(currentLikedChoices) : [];
             if (currentLikedChoices.includes(choice.id)) return;
@@ -244,23 +245,23 @@ document.addEventListener("DOMContentLoaded", function () {
             const currentLikes = choice.likes || 0;
             const choiceRef = database.ref(`pages/${currentPageId}/choices/${choice.id}`);
             choiceRef.update({ likes: currentLikes + 1 });
-            
+
             currentLikedChoices.push(choice.id);
             localStorage.setItem('likedChoices', JSON.stringify(currentLikedChoices));
-            
+
             likeButton.classList.add('liked');
             likeButton.disabled = true;
           });
-          
+
           const likeCount = document.createElement('span');
           likeCount.innerText = (choice.likes || 0) + ' likes';
           likeCount.className = 'like-count';
-          
+
           // MERGED: Creator Info
           const creatorInfo = document.createElement('span');
           creatorInfo.className = 'creator-info';
-          creatorInfo.innerText = `by: ${choice.creatorName || 'Anonymous'}`; 
-          
+          creatorInfo.innerText = `by: ${choice.creatorName || 'Anonymous'}`;
+
           choiceContainer.appendChild(newButton);
           choiceContainer.appendChild(likeButton);
           choiceContainer.appendChild(likeCount);
@@ -275,9 +276,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // -------------------------------------------------------------------
   // --- 9. "ADD CHOICE" BUTTON LOGIC (MERGED) ---
   // -------------------------------------------------------------------
-  
-  addChoiceButton.addEventListener('click', function() {
-    
+
+  addChoiceButton.addEventListener('click', function () {
+
     // Auth check
     const user = auth.currentUser;
     if (!user) {
@@ -288,13 +289,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const choiceText = newChoiceInput.value;
     const storyText = newStoryInput.value;
     // Image URL
-    const imageUrl = newImageUrlInput.value.trim(); 
-    
+    const imageUrl = newImageUrlInput.value.trim();
+
     if (choiceText === "" || storyText === "") {
       alert("Please fill out both the 'choice' and the 'story'!");
-      return; 
+      return;
     }
-    
+
     // Filter
     const blocklist = ["poop", "silly", "badword"];
     const normalizedInput = normalizeText(choiceText + " " + storyText);
@@ -305,7 +306,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const newPageRef = database.ref('pages').push();
     const newPageId = newPageRef.key;
-    
+
     // MERGED: Create new page data with optional image
     const newPageData = {
       story_text: storyText
@@ -321,11 +322,11 @@ document.addEventListener("DOMContentLoaded", function () {
       leads_to_page: newPageId,
       likes: 0,
       createdBy: user.uid,
-      creatorName: user.displayName || user.email 
+      creatorName: user.displayName || user.email
     };
-    
+
     database.ref(`pages/${currentPageId}/choices`).push(newChoice);
-    
+
     newChoiceInput.value = "";
     newStoryInput.value = "";
     newImageUrlInput.value = ""; // Clear image input
@@ -335,31 +336,31 @@ document.addEventListener("DOMContentLoaded", function () {
   // -------------------------------------------------------------------
   // --- 10. NAVIGATION & SORT BUTTONS ---
   // -------------------------------------------------------------------
-  
+
   goStartButton.addEventListener('click', () => renderPage('page_1'));
-  
-  goBackButton.addEventListener('click', function() {
+
+  goBackButton.addEventListener('click', function () {
     pageHistory.pop();
     const previousPageId = pageHistory.pop();
     renderPage(previousPageId);
   });
-  
+
   themeToggleButton.addEventListener('click', () => document.body.classList.toggle('dark-mode'));
-  
-  sortPopularButton.addEventListener('click', function() {
+
+  sortPopularButton.addEventListener('click', function () {
     currentSortMode = 'popular';
     sortPopularButton.classList.add('sort-active');
     sortNewestButton.classList.remove('sort-active');
     renderPage(currentPageId);
   });
-  
-  sortNewestButton.addEventListener('click', function() {
+
+  sortNewestButton.addEventListener('click', function () {
     currentSortMode = 'newest';
     sortNewestButton.classList.add('sort-active');
     sortPopularButton.classList.remove('sort-active');
     renderPage(currentPageId);
   });
-  
+
 
   // -------------------------------------------------------------------
   // --- 11. NEW: STORY MAP LOGIC ---
@@ -368,10 +369,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize Mermaid.js
   mermaid.initialize({
     startOnLoad: true,
-    theme: 'dark', 
-    
+    theme: 'dark',
+
     // --- THIS IS THE NEW, IMPORTANT LINE ---
-    securityLevel: 'loose', 
+    securityLevel: 'loose',
     // --- END OF NEW LINE ---
 
     flowchart: {
@@ -405,15 +406,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
       let mermaidString = 'graph TD;\n'; // Top Down graph
 
+      // --- NEW: Add a style for the current page node ---
+      // This uses your theme's green submit button color
+      mermaidString += 'classDef currentNode fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff;\n';
+
+
       for (const pageId in allPages) {
         const page = allPages[pageId];
 
         // Get clean text for the node label
         const shortText = page.story_text.substring(0, 20).replace(/"/g, '#quot;') + '...';
         mermaidString += `  ${pageId}["${shortText}"];\n`;
-        
+
         // This is the new, fixed line
         mermaidString += `  click ${pageId} "javascript:goToPageFromMap('${pageId}')";\n`;
+
+        // --- NEW: Apply the style if this is the current page ---
+        if (pageId === currentPageId) {
+          mermaidString += `  class ${pageId} currentNode;\n`;
+        }
+
 
         if (page.choices) {
           for (const choiceId in page.choices) {
@@ -430,6 +442,34 @@ document.addEventListener("DOMContentLoaded", function () {
       // Render the graph
       mermaid.render('mermaid-svg', mermaidString, (svgCode) => {
         mermaidGraphDiv.innerHTML = svgCode;
+
+        // --- NEW: Add Tooltips (with corrected regex) ---
+        // After the SVG is in the page, find all nodes and add tooltips
+        mermaidGraphDiv.querySelectorAll('.node').forEach(nodeEl => {
+          // Get the 'onclick' attribute, e.g., "javascript:goToPageFromMap('-Nq...abc')"
+          const clickAttr = nodeEl.getAttribute('onclick');
+          if (clickAttr) {
+
+            // --- NEW: This regex now looks for SINGLE quotes ---
+            const match = clickAttr.match(/goToPageFromMap\('([^']+)'\)/);
+
+            if (match && match[1]) {
+              const pageId = match[1];
+              // If this pageId exists in our data
+              if (allPages[pageId]) {
+                // Get the full story text
+                const fullText = allPages[pageId].story_text;
+
+                // Add an SVG <title> element, which acts as a native tooltip
+                const titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                titleEl.textContent = fullText;
+                // Add the tooltip as the first child of the node <g> element
+                nodeEl.insertBefore(titleEl, nodeEl.firstChild);
+              }
+            }
+          }
+        });
+        // --- End of new tooltip code ---
       });
 
     } catch (error) {
