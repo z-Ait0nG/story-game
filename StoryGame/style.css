@@ -111,15 +111,9 @@ h3:first-child {
   }
 }
 
-/* NEW: Emphasized Story Text */
 #story-text {
-  font-size: 1.25em;
-  /* Larger */
+  font-size: 1.15em;
   line-height: 1.7;
-  color: var(--title-color);
-  /* Brighter */
-  margin-bottom: 25px;
-  /* More space */
   white-space: pre-wrap;
 }
 
@@ -197,7 +191,6 @@ textarea::placeholder {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  /* Allows wrapping on small screens */
   margin-bottom: 10px;
   padding: 5px;
 }
@@ -207,7 +200,6 @@ textarea::placeholder {
   text-align: left;
   margin-right: 10px;
   min-width: 150px;
-  /* Ensures button isn't too squished */
 }
 
 .like-button {
@@ -259,27 +251,10 @@ textarea::placeholder {
   flex-grow: 1;
 }
 
-/* NEW: Remove the <hr> rule */
-/* #auth-card hr { ... } */
-
-/* NEW: Styles for the toggle links */
-.auth-toggle {
-  font-size: 0.9em;
-  text-align: center;
-  margin-top: 15px;
-  color: var(--text-color);
-  opacity: 0.8;
-}
-
-.auth-toggle a {
-  color: var(--primary-btn-bg);
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.auth-toggle a:hover {
-  text-decoration: underline;
+#auth-card hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 20px 0;
 }
 
 #auth-card button {
@@ -288,7 +263,6 @@ textarea::placeholder {
 
 #auth-error {
   color: #ef4444;
-  /* Bright red */
   font-size: 0.9em;
   margin-top: 15px;
   text-align: center;
@@ -313,7 +287,7 @@ textarea::placeholder {
   background-color: var(--secondary-btn-hover);
 }
 
-/* 10. NEW: IMAGE STYLES */
+/* 10. IMAGE STYLES */
 #story-image-container {
   width: 100%;
   margin-bottom: 20px;
@@ -327,7 +301,7 @@ textarea::placeholder {
   border: 1px solid var(--card-border);
 }
 
-/* 11. NEW: STORY MAP MODAL STYLES */
+/* 11. STORY MAP MODAL STYLES (UPGRADED) */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -346,13 +320,12 @@ textarea::placeholder {
   color: var(--text-color);
   padding: 20px;
   border-radius: 12px;
-  width: 90%;
-  max-width: 800px;
-  height: 80%;
+  width: 95%;          /* <-- Increased from 90% */
+  max-width: 1200px;   /* <-- Increased from 800px */
+  height: 90%;         /* <-- Increased from 80% */
   position: relative;
   border: 1px solid var(--card-border);
   overflow: auto;
-  /* Enables scrolling for large maps */
 }
 
 #close-map-button {
@@ -378,19 +351,17 @@ textarea::placeholder {
 .modal-content::-webkit-scrollbar {
   width: 12px;
 }
-
 .modal-content::-webkit-scrollbar-track {
   background: var(--card-bg);
   border-radius: 6px;
 }
-
 .modal-content::-webkit-scrollbar-thumb {
   background-color: var(--secondary-btn-bg);
   border-radius: 6px;
   border: 3px solid var(--card-bg);
 }
 
-/* 12. NEW: MERMAID (MAP) NODE STYLING */
+/* 12. MERMAID (MAP) NODE STYLING (UPGRADED) */
 body.dark-mode .mermaid {
   background-color: #1f2937;
 }
@@ -399,7 +370,6 @@ body.dark-mode .mermaid {
   max-width: none;
 }
 
-/* This styles the node boxes */
 .mermaid .node rect,
 .mermaid .node polygon {
   fill: var(--input-bg-color);
@@ -409,26 +379,28 @@ body.dark-mode .mermaid {
   transition: fill 0.2s ease;
 }
 
-/* This styles the node hover effect */
+/* Light mode fixes */
+body:not(.dark-mode) .mermaid .node rect,
+body:not(.dark-mode) .mermaid .node polygon {
+  stroke: #888; /* Darker border for light mode */
+}
+
 .mermaid .node:hover rect,
 .mermaid .node:hover polygon {
   fill: var(--card-bg);
 }
 
-/* NEW: Make map text bigger */
 .mermaid .node .label {
   color: var(--text-color) !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-weight: 600 !important;
-  font-size: 14px !important;
+  font-weight: 600;     /* <-- Bolder */
+  font-size: 1.2em;   /* <-- Bigger */
 }
 
-/* NEW: Make arrow text bigger */
 .mermaid .edgeLabel {
-  background-color: var(--card-bg) !important;
+  background-color: var(--card-bg);
   color: var(--text-color) !important;
-  font-weight: 500 !important;
-  font-size: 12px !important;
+  font-weight: 300;
   padding: 2px;
 }
 
@@ -437,24 +409,41 @@ body.dark-mode .mermaid {
   stroke-width: 1.5px;
 }
 
-/* NEW: Style for popular path arrows */
-.mermaid .edgePath.thick .path {
-  stroke-width: 3px !important;
-  stroke: #ffffff !important;
-  /* Bright white */
+/* Light mode fixes */
+body:not(.dark-mode) .mermaid .edgePath .path {
+  stroke: #888; /* Darker arrows for light mode */
+  stroke-width: 2px;
+}
+body:not(.dark-mode) .mermaid .edgeLabel {
+  color: #000 !important; /* Ensures edge text is black */
 }
 
-.mermaid .arrowheadPath.thick {
-  fill: #ffffff !important;
+/* 13. AUTH FORM SWITCH LINKS */
+.form-switch-link {
+  font-size: 0.9em;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 0;
+  color: var(--text-color);
 }
 
-/* NEW: Style for 'Current Page' highlight */
-.mermaid .node.currentNode rect {
-  fill: #10b981 !important;
-  /* Green */
-  stroke: #ffffff !important;
+.form-switch-link a {
+  color: var(--primary-btn-bg);
+  text-decoration: none;
+  font-weight: 600;
 }
 
-.mermaid .node.currentNode .label {
-  color: #ffffff !important;
+.form-switch-link a:hover {
+  text-decoration: underline;
+}
+
+/* 14. AUTH INTRO TEXT */
+.auth-intro-text {
+  text-align: center;
+  font-size: 1.1em;
+  font-weight: 500;
+  color: var(--text-color);
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
 }
