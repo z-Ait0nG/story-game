@@ -291,7 +291,9 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const blocklist = ["poop", "silly", "badword"];
+    const blocklist = ["shit", "fuck", "dick", "nigger", "ass", "gangbang", "orgy", "bitch", "retard", "bigget", "faggot", "chink", "hitle", "nazi", 
+                      "kys", "kill", "dead", "die", "dying", "suicide", "sex", "gay", "blackie", "rape", "cocaine", "heroin", "meth", "crack", "mauijuana",
+                      " Marijuana", "pussy", "vagina", "penis", "cracker", "slave", "cock", "torture"];
     const normalizedInput = normalizeText(choiceText + " " + storyText);
     if (blocklist.some(word => normalizedInput.includes(word))) {
       alert("Whoops! Please use appropriate language.");
